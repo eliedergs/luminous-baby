@@ -56,21 +56,62 @@ Valide:
 
 ---
 
-## 4. Criar o projeto no Cloudflare Pages
+## 4. Conectar o repositório no Cloudflare
 
-1. Acesse **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-2. Autorize o Git e selecione o repositório
-3. Se o blog não estiver na raiz do repo, configure:
+Este blog exporta HTML estático para `out/`. Existem **dois fluxos** no painel — o seu provavelmente é **Workers Builds** (sem campo “preset”).
+
+---
+
+### Opção A — Workers Builds (painel atual, o mais comum em 2025+)
+
+Você criou em **Workers & Pages → Create application** conectado ao Git. Não há “Framework preset”; o Wrangler **auto-detecta** Next.js e tenta OpenNext (SSR) — errado para este projeto.
+
+**Onde ajustar:**
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages**
+2. Clique no projeto **`luminous-baby`**
+3. Aba **Settings** (Configurações)
+4. Seção **Build** (ou **Builds**)
+5. Edite e salve:
 
 | Campo | Valor |
 |-------|--------|
-| **Production branch** | `main` (ou sua branch principal) |
-| **Root directory** | caminho até `Social Blog` (ex.: `Projects/Social Blog`) |
-| **Framework preset** | `None` |
-| **Build command** | `npm ci && npm run build` |
-| **Build output directory** | `out` |
+| **Git branch** | `master` |
+| **Build command** | `npm run build` |
+| **Deploy command** | `npx wrangler deploy --assets ./out` |
+| **Root directory** | *(vazio)* |
 
-4. Em **Environment variables** (Production e Preview):
+6. Na mesma página ou em **Settings → Variables**, adicione variável de **build** (precisa existir durante o `next build`):
+
+| Variável | Valor |
+|----------|--------|
+| `SITE_URL` | `https://luminous-baby.pages.dev` *(ajuste após o 1º deploy)* |
+
+7. **Deployments** → **Retry deployment**
+
+O repositório inclui `wrangler.jsonc` apontando `assets.directory` para `./out`. Depois do push, o deploy command pode ser só `npx wrangler deploy` — o Wrangler **não** tentará OpenNext se o arquivo já existir.
+
+**Build command:** o Cloudflare já roda `npm clean-install` antes — use só `npm run build`, sem repetir `npm ci`.
+
+---
+
+### Opção B — Cloudflare Pages clássico (se recriar o projeto)
+
+Só aparece “Framework preset” ao criar via **Pages → Connect to Git** (aba **Pages**, não Worker):
+
+| Campo | Valor |
+|-------|--------|
+| **Production branch** | `master` |
+| **Framework preset** | **None** |
+| **Build command** | `npm run build` |
+| **Build output directory** | `out` |
+| **Deploy command** | *(não existe — Pages publica `out` sozinho)* |
+
+Se você **não** vir preset, está na Opção A — use a seção acima.
+
+---
+
+### Variáveis de ambiente
 
 | Variável | Valor |
 |----------|--------|
@@ -134,11 +175,32 @@ Ou, manualmente: `npm run build` + deploy da pasta `out/`.
 
 | Sintoma | Solução |
 |---------|---------|
-| Build falha no CF | Verifique Node 20+, `npm ci` e logs; teste `npm run build` local |
+| Build passa, deploy falha com `opennextjs-cloudflare` / `pages-manifest.json` | Projeto configurado como **Worker/Next.js SSR**. Em **Settings → Build** mude preset para **None**, output para **`out`**, e **apague o Deploy command** (`npx wrangler deploy`). Retry deployment. |
+| `wrangler deploy` roda após o build | Remova o **Deploy command** — Pages publica a pasta `out/` automaticamente; não precisa de Wrangler no deploy Git. |
+| Build falha no CF | Verifique Node 20+, logs; teste `npm run build` local |
 | 404 em rotas do blog | Confirme **Build output directory** = `out` (não `.next`) |
 | Sitemap com URL errada | Corrija `SITE_URL` e refaça o deploy |
 | Imagens não aparecem | Arquivos devem estar em `public/images/posts/...` antes do build |
 | `_headers` ignorado | Arquivo deve estar em `public/_headers`; confira em `out/_headers` após build |
+
+### Erro típico (OpenNext após build bem-sucedido)
+
+Se o log mostra `Success: Build command completed` e depois falha em `npx wrangler deploy` ou `opennextjs-cloudflare build` com:
+
+```
+ENOENT: .../.next/standalone/.next/server/pages-manifest.json
+```
+
+**Causa:** o painel detectou Next.js e tentou publicar como **Cloudflare Worker** (SSR), mas o projeto exporta HTML estático para `out/` — não gera `.next/standalone`.
+
+**Correção no painel** (Settings → **Build** / Builds):
+
+1. **Build command** → `npm run build`
+2. **Deploy command** → `npx wrangler deploy --assets ./out` *(ou `npx wrangler deploy` após push do `wrangler.jsonc`)*
+3. Confirme que **não** está rodando só `npx wrangler deploy` sem `--assets ./out` e sem `wrangler.jsonc` — isso dispara auto-config OpenNext
+4. **Retry deployment**
+
+Não é necessário instalar `@opennextjs/cloudflare`, `wrangler.jsonc` nem mudar `next.config.ts`.
 
 ---
 
