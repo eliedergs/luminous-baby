@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-[var(--color-cream-dark)] bg-white">
@@ -9,7 +11,13 @@ export function SiteFooter() {
         <p className="mt-1">Carinho para bebê e maternidade</p>
         <p className="mt-4 text-xs leading-relaxed">
           Alguns links neste site são de afiliados. Podemos receber comissão
-          sem custo extra para você.
+          sem custo extra para você.{" "}
+          <Link
+            href="/afiliados"
+            className="text-[var(--color-sage-deep)] underline-offset-2 hover:underline"
+          >
+            Saiba mais
+          </Link>
         </p>
       </div>
     </footer>

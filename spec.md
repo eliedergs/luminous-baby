@@ -12,7 +12,7 @@
 | Formato de conteúdo | MDX | Suporta frontmatter estruturado e componentes React inline |
 | Processamento MDX | `next-mdx-remote` + `gray-matter` | Leitura de frontmatter rico com campos customizados; compatível com App Router |
 | API de geração de conteúdo | Gemini Flash (fase inicial) | Valida pipeline sem custo; migra para Claude Haiku quando houver tração comprovada |
-| Deploy | A definir | — |
+| Deploy | Cloudflare Pages (`output: "export"`, pasta `out/`) | SSG estático, CDN global, custo zero na fase inicial |
 
 ---
 
@@ -21,20 +21,32 @@
 ```
 /
 ├── app/
+│   ├── page.tsx                  ← home com listagem de posts
+│   ├── afiliados/page.tsx        ← divulgação de links de afiliados
+│   ├── sitemap.ts                ← sitemap.xml estático
+│   ├── robots.ts                 ← robots.txt
 │   └── blog/
 │       └── [slug]/
 │           └── page.tsx          ← lê o MDX pelo slug, renderiza o post
-├── content/
-│   └── posts/
-│       ├── melhor-carrinho-bebe.mdx
-│       ├── como-escolher-cadeirinha.mdx
-│       └── ...                   ← todos os posts aqui, um arquivo por post
+├── resources/
+│   ├── posts/                    ← todos os posts MDX (um arquivo por post)
+│   ├── templates/                ← templates de estrutura por type
+│   └── prompts/                  ← prompts para geração externa (post generator)
+├── public/
+│   └── images/posts/{slug}/      ← imagens locais referenciadas por <PostImage name="...">
 ├── lib/
-│   └── mdx.ts                    ← getAllPosts(), getPostBySlug()
+│   ├── mdx.ts                    ← getAllPosts(), getPostBySlug()
+│   ├── images.ts                 ← resolvePostCover(), paths de imagem
+│   └── site.ts                   ← SITE_URL, absoluteUrl()
 └── components/
-    ├── AffiliateButton.tsx        ← CTA de afiliado com rel="nofollow sponsored"
-    ├── ProductCard.tsx            ← cards de "Produtos relacionados"
-    └── FAQ.tsx                    ← FAQ com schema markup FAQPage (Schema.org)
+    ├── AffiliateButton.tsx       ← CTA de afiliado com rel="nofollow sponsored"
+    ├── ProductCard.tsx           ← card interno (title/slug) ou externo (nome/preco/rating/link)
+    ├── FAQ.tsx                   ← FAQ com schema FAQPage (Schema.org)
+    ├── PostImage.tsx             ← imagem local (name) ou URL externa (url/src)
+    ├── BlogPostingSchema.tsx     ← JSON-LD BlogPosting por post
+    ├── MdxContent.tsx            ← render MDX com remark-gfm
+    ├── SiteHeader.tsx
+    └── SiteFooter.tsx
 ```
 
 ---
@@ -49,7 +61,18 @@ Recebe `href` e `label`. Renderiza o CTA com `rel="nofollow sponsored"` automati
 
 ### `<ProductCard>`
 
-Recebe `nome`, `preco`, `rating` e `link`. Usado na seção "Produtos relacionados" de cada post. Pode puxar os dados diretamente do frontmatter do post relacionado.
+Dois modos:
+
+- **Interno** — `title`, `slug`, `description`: link para outro post do blog (`/blog/{slug}`).
+- **Externo** — `nome`, `preco`, `rating`, `link`: card de produto com link de afiliado (`rel="nofollow sponsored"`).
+
+### `<PostImage>`
+
+- `name` — resolve para `public/images/posts/{slug}/{name}.webp|jpg|png`.
+- `url` ou `src` — imagem externa direta.
+- Placeholder tracejado em desenvolvimento quando o arquivo local não existe.
+
+Frontmatter opcional: `cover: hero` para imagem de capa (Open Graph e schema).
 
 ### `<FAQ>`
 
@@ -59,7 +82,7 @@ Renderiza as perguntas com o schema markup `FAQPage` do Schema.org embutido. Aum
 
 ## Formato dos Posts (MDX)
 
-Todos os posts são arquivos `.mdx` em `/content/posts/`. Cada arquivo tem duas partes: frontmatter YAML e corpo em MDX.
+Todos os posts são arquivos `.mdx` em `resources/posts/`. Cada arquivo tem duas partes: frontmatter YAML e corpo em MDX. O processamento usa `remark-gfm` (tabelas GFM) via `MdxContent`.
 
 ### Frontmatter — Post de Produto (`type: review` ou `type: comparativo`)
 
@@ -115,6 +138,9 @@ repurpose:
 - FAQ: perguntas em linguagem natural de busca (como a pessoa pesquisaria no Google)
 - H2 nas seções temáticas dos pilares: descritivos e diretos — bons para ranqueamento de seção e featured snippets
 - Schema markup `FAQPage`: gerado automaticamente pelo componente `<FAQ>`
+- Schema markup `BlogPosting`: gerado por `BlogPostingSchema` em cada post (`headline`, datas, `description`, `cover`)
+- `sitemap.xml` e `robots.txt`: gerados em build (`app/sitemap.ts`, `app/robots.ts`); URL base via `SITE_URL`
+- Página `/afiliados`: divulgação de links de afiliados; link no footer
 
 ---
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BlogPostingSchema } from "@/components/BlogPostingSchema";
 import { MdxContent } from "@/components/MdxContent";
 import { resolvePostCover } from "@/lib/images";
 import { getAllSlugs, getPostBySlug } from "@/lib/mdx";
@@ -60,8 +61,11 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
+  const cover = resolvePostCover(post.slug, post.cover);
+
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
+      <BlogPostingSchema post={post} coverUrl={cover} />
       <header>
         <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-[var(--color-sage-deep)]">
           <span>{post.category}</span>

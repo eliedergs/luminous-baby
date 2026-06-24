@@ -26,14 +26,14 @@
 
 ### Entregas
 
-- [ ] **Deploy estático** — Cloudflare Pages configurado; `output: export` habilitado
-- [ ] **`sitemap.xml`** — todas as rotas (`/`, `/blog/[slug]`)
-- [ ] **`robots.txt`** — permitir crawl; apontar para o sitemap
-- [ ] **URL canônica** por post (`metadata.alternates.canonical`)
-- [ ] **Schema `BlogPosting`** — título, datas, descrição, imagem (`cover` / `hero`)
-- [ ] **Página de divulgação de afiliados** — `/afiliados` ou `/sobre#afiliados`; link no footer
-- [ ] **Ajustar `description`** dos 4 posts piloto para 140–155 caracteres
-- [ ] **Atualizar `spec.md`** — refletir `resources/posts/`, `PostImage`, `remark-gfm`, `cover`, `media_*`
+- [x] **Deploy estático** — Cloudflare Pages configurado; `output: export` habilitado *(deploy no painel pendente)*
+- [x] **`sitemap.xml`** — todas as rotas (`/`, `/blog/[slug]`, `/afiliados`)
+- [x] **`robots.txt`** — permitir crawl; apontar para o sitemap
+- [x] **URL canônica** por post (`metadata.alternates.canonical`)
+- [x] **Schema `BlogPosting`** — título, datas, descrição, imagem (`cover` / `hero`)
+- [x] **Página de divulgação de afiliados** — `/afiliados`; link no footer
+- [x] **Ajustar `description`** dos posts piloto para 140–155 caracteres
+- [x] **Atualizar `spec.md`** — refletir `resources/posts/`, `PostImage`, `remark-gfm`, `cover`, `media_*`
 
 ### Fora de escopo nesta fase
 
