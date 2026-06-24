@@ -8,13 +8,15 @@
 
 ## Visão geral das fases
 
-| Fase | Nome | Objetivo | Depende de |
-|------|------|----------|------------|
-| **1** | Publicar com confiança | Site no ar com SEO mínimo e compliance | MVP atual |
-| **2** | Escalar conteúdo | Gerar e publicar posts sem quebrar o sistema | Fase 1 |
-| **3** | Estrutura editorial | Navegação por categoria/cluster e confiança | Fase 2 |
-| **4** | Dados e conversão | Produtos frescos e métricas de afiliado | Fase 2 |
-| **5** | Distribuição e polish | Redes sociais, performance e refinamentos UX | Fases 3–4 |
+
+| Fase  | Nome                   | Objetivo                                     | Depende de |
+| ----- | ---------------------- | -------------------------------------------- | ---------- |
+| **1** | Publicar com confiança | Site no ar com SEO mínimo e compliance       | MVP atual  |
+| **2** | Escalar conteúdo       | Gerar e publicar posts sem quebrar o sistema | Fase 1     |
+| **3** | Estrutura editorial    | Navegação por categoria/cluster e confiança  | Fase 2     |
+| **4** | Dados e conversão      | Produtos frescos e métricas de afiliado      | Fase 2     |
+| **5** | Distribuição e polish  | Redes sociais, performance e refinamentos UX | Fases 3–4  |
+
 
 ---
 
@@ -24,7 +26,7 @@
 
 ### Entregas
 
-- [ ] **Deploy estático** — Vercel, Cloudflare Pages ou equivalente; habilitar `output: export` se o host for 100% estático
+- [ ] **Deploy estático** — Cloudflare Pages configurado; `output: export` habilitado
 - [ ] **`sitemap.xml`** — todas as rotas (`/`, `/blog/[slug]`)
 - [ ] **`robots.txt`** — permitir crawl; apontar para o sitemap
 - [ ] **URL canônica** por post (`metadata.alternates.canonical`)
@@ -147,14 +149,16 @@ Fluxo post → redes com export automático; Core Web Vitals aceitáveis em mobi
 
 Itens úteis, mas dependentes de tração ou decisão de produto:
 
-| Item | Notas |
-|------|--------|
-| Calculadoras interativas | Data do parto, fraldas no 1º ano — tráfego de topo de funil |
-| CMS (TinaCMS / Decap) | Reavaliar após 90 dias se edição colaborativa for necessária |
-| Migração para Claude Haiku | Quando volume de geração justificar custo |
-| Newsletter | Captura de e-mail + RSS |
-| Testes E2E | Playwright nas rotas críticas e validação de schema |
-| i18n | Só se houver expansão além do BR |
+
+| Item                       | Notas                                                        |
+| -------------------------- | ------------------------------------------------------------ |
+| Calculadoras interativas   | Data do parto, fraldas no 1º ano — tráfego de topo de funil  |
+| CMS (TinaCMS / Decap)      | Reavaliar após 90 dias se edição colaborativa for necessária |
+| Migração para Claude Haiku | Quando volume de geração justificar custo                    |
+| Newsletter                 | Captura de e-mail + RSS                                      |
+| Testes E2E                 | Playwright nas rotas críticas e validação de schema          |
+| i18n                       | Só se houver expansão além do BR                             |
+
 
 ---
 
@@ -185,6 +189,9 @@ Social Blog (este repo)
 
 ## Histórico
 
-| Data | Alteração |
-|------|-----------|
+
+| Data       | Alteração                                                     |
+| ---------- | ------------------------------------------------------------- |
 | 2026-06-24 | Documento inicial — pós-MVP com 4 posts do cluster Mobilidade |
+
+
