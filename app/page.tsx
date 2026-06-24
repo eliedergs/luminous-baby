@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PostListCard } from "@/components/PostListCard";
 import { getAllPosts } from "@/lib/mdx";
 
 export default function HomePage() {
@@ -27,9 +28,19 @@ export default function HomePage() {
       </section>
 
       <section className="mt-16">
-        <h2 className="font-serif text-2xl text-[var(--color-ink)]">
-          Artigos recentes
-        </h2>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-serif text-2xl text-[var(--color-ink)]">
+            Artigos recentes
+          </h2>
+          {posts.length > 0 && (
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-[var(--color-sage-deep)] underline-offset-2 hover:underline"
+            >
+              Ver todos
+            </Link>
+          )}
+        </div>
 
         {posts.length === 0 ? (
           <p className="mt-4 text-[var(--color-taupe)]">
@@ -45,25 +56,8 @@ export default function HomePage() {
           </p>
         ) : (
           <ul className="mt-6 space-y-4">
-            {posts.map((post) => (
-              <li key={post.slug}>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="group block rounded-2xl border border-[var(--color-cream-dark)] bg-white p-5 transition hover:border-[var(--color-rose)]"
-                >
-                  <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-[var(--color-sage-deep)]">
-                    <span>{post.category}</span>
-                    <span aria-hidden>·</span>
-                    <span>{post.type}</span>
-                  </div>
-                  <h3 className="mt-2 font-serif text-xl text-[var(--color-ink)] group-hover:text-[var(--color-rose-deep)]">
-                    {post.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-[var(--color-taupe)]">
-                    {post.description}
-                  </p>
-                </Link>
-              </li>
+            {posts.slice(0, 3).map((post) => (
+              <PostListCard key={post.slug} post={post} />
             ))}
           </ul>
         )}

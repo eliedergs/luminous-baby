@@ -85,6 +85,14 @@ export function PostImage({ alt, caption, slug, name, url, src }: PostImageProps
   const localSrc = resolvePostImage(slug, name);
 
   if (!localSrc) {
+    const showPlaceholder =
+      process.env.NODE_ENV === "development" ||
+      process.env.SHOW_IMAGE_PLACEHOLDERS === "true";
+
+    if (!showPlaceholder) {
+      return null;
+    }
+
     return (
       <PostImagePlaceholder
         slug={slug}

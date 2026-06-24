@@ -18,6 +18,14 @@ export function SiteHeader() {
             <span className="text-[var(--color-sage)]">Baby</span>
           </span>
         </Link>
+        <nav className="text-sm">
+          <Link
+            href="/blog"
+            className="font-medium text-[var(--color-sage-deep)] underline-offset-2 hover:underline"
+          >
+            Blog
+          </Link>
+        </nav>
       </div>
     </header>
   );

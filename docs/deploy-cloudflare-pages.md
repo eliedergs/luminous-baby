@@ -56,58 +56,112 @@ Valide:
 
 ---
 
-## 4. Conectar o repositório no Cloudflare
+## 4. Deploy no Cloudflare Pages (recomendado — URL planejada)
 
-Este blog exporta HTML estático para `out/`. Existem **dois fluxos** no painel — o seu provavelmente é **Workers Builds** (sem campo “preset”).
+**URL alvo deste projeto:** `https://luminousbaby.pages.dev`  
+(definida em `lib/site.ts`, `.env.example` e sitemap/canonical)
 
----
-
-### Opção A — Workers Builds (painel atual, o mais comum em 2025+)
-
-Você criou em **Workers & Pages → Create application** conectado ao Git. Não há “Framework preset”; o Wrangler **auto-detecta** Next.js e tenta OpenNext (SSR) — errado para este projeto.
-
-**Onde ajustar:**
-
-1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages**
-2. Clique no projeto **`luminous-baby`**
-3. Aba **Settings** (Configurações)
-4. Seção **Build** (ou **Builds**)
-5. Edite e salve:
-
-| Campo | Valor |
-|-------|--------|
-| **Git branch** | `master` |
-| **Build command** | `npm run build` |
-| **Deploy command** | `npx wrangler deploy --assets ./out` |
-| **Root directory** | *(vazio)* |
-
-6. Na mesma página ou em **Settings → Variables**, adicione variável de **build** (precisa existir durante o `next build`):
-
-| Variável | Valor |
-|----------|--------|
-| `SITE_URL` | `https://luminous-baby.pages.dev` *(ajuste após o 1º deploy)* |
-
-7. **Deployments** → **Retry deployment**
-
-O repositório inclui `wrangler.jsonc` apontando `assets.directory` para `./out`. Depois do push, o deploy command pode ser só `npx wrangler deploy` — o Wrangler **não** tentará OpenNext se o arquivo já existir.
-
-**Build command:** o Cloudflare já roda `npm clean-install` antes — use só `npm run build`, sem repetir `npm ci`.
+| Produto | URL gerada | Usar neste blog? |
+|---------|------------|------------------|
+| **Cloudflare Pages** | `https://<nome>.pages.dev` | **Sim** — é o plano |
+| **Workers + static assets** | `https://<nome>.<conta>.workers.dev` | Não |
 
 ---
 
-### Opção B — Cloudflare Pages clássico (se recriar o projeto)
+### Onde está “Pages” no painel? (UI 2025+)
 
-Só aparece “Framework preset” ao criar via **Pages → Connect to Git** (aba **Pages**, não Worker):
+A Cloudflare **unificou** Workers e Pages. Em contas novas, **Create application** costuma mostrar só **Import a repository** (Worker) — a aba **Pages** nem sempre aparece.
+
+Tente nesta ordem:
+
+#### Caminho 1 — Aba Pages (se existir)
+
+1. **Workers & Pages** → **Create application**
+2. No topo, procure abas **Workers** | **Pages**
+3. **Pages** → **Connect to Git** → repo `liedergs/luminous-baby`
+
+#### Caminho 2 — Drag and drop (cria projeto `.pages.dev` sem Git)
+
+1. **Workers & Pages** → **Create application**
+2. **Get started** → **Drag and drop your files**
+3. Nome do projeto: **`luminousbaby`**
+4. Localmente: `npm run build` → arraste a pasta **`out/`** para o painel
+
+Isso gera `https://luminousbaby.pages.dev`, mas **não** conecta Git (deploy manual ou via GitHub Actions depois).
+
+#### Caminho 3 — Wrangler no terminal (recomendado se o painel não mostra Pages)
+
+Cria o projeto Pages e publica a URL correta **sem** depender do painel:
+
+```bash
+cd "Projects/Social Blog"
+
+npx wrangler login
+npx wrangler pages project create luminousbaby --production-branch master
+
+SITE_URL=https://luminousbaby.pages.dev npm run build
+npx wrangler pages deploy out --project-name=luminousbaby --branch=master
+```
+
+O site fica em **`https://luminousbaby.pages.dev`**.
+
+Para deploy automático a cada `git push`, use **GitHub Actions** (seção 4b abaixo) — é o fluxo oficial quando não há “Connect to Git” no Pages.
+
+**Importante:** não use **Import a repository** neste fluxo — isso cria **Worker** (`*.workers.dev`), não Pages.
+
+---
+
+### 4a. Configuração Git no painel (quando a aba Pages aparecer)
 
 | Campo | Valor |
 |-------|--------|
+| **Project name** | **`luminousbaby`** |
 | **Production branch** | `master` |
 | **Framework preset** | **None** |
 | **Build command** | `npm run build` |
-| **Build output directory** | `out` |
-| **Deploy command** | *(não existe — Pages publica `out` sozinho)* |
+| **Build output directory** | **`out`** |
 
-Se você **não** vir preset, está na Opção A — use a seção acima.
+Variável: `SITE_URL` = `https://luminousbaby.pages.dev`
+
+---
+
+### 4b. GitHub Actions (Pages via Wrangler — sem aba Pages)
+
+Se só existir Worker no painel, crie o projeto com o Caminho 3 e adicione no repo:
+
+1. Token Cloudflare: **My Profile → API Tokens → Create** → permissão **Account → Cloudflare Pages → Edit**
+2. GitHub repo → **Settings → Secrets → Actions**:
+   - `CLOUDFLARE_ACCOUNT_ID`
+   - `CLOUDFLARE_API_TOKEN`
+3. Arquivo `.github/workflows/deploy-pages.yml`:
+
+```yaml
+name: Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          SITE_URL: https://luminousbaby.pages.dev
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=luminousbaby --branch=master
+```
+
+Cada push em `master` publica em `luminousbaby.pages.dev`.
 
 ---
 
@@ -130,9 +184,9 @@ O primeiro deploy pode levar alguns minutos. A URL padrão será `https://<nome-
 
 ## 5. Ajustar `SITE_URL` após o primeiro deploy
 
-1. Anote a URL que o Cloudflare gerou (ex.: `https://luminous-baby.pages.dev`)
-2. Em **Settings** → **Environment variables**, atualize `SITE_URL` com essa URL exata
-3. **Deployments** → **Retry deployment** (ou faça um commit vazio) para regenerar `sitemap.xml` e canonical com a URL correta
+1. Confirme a URL do projeto Pages: `https://luminousbaby.pages.dev`
+2. Em **Settings** → **Environment variables**, defina `SITE_URL=https://luminousbaby.pages.dev`
+3. **Deployments** → **Retry deployment** para regenerar `sitemap.xml` e canonical
 
 Sem isso, sitemap e Open Graph podem apontar para o placeholder `luminousbaby.pages.dev`.
 
@@ -146,16 +200,17 @@ Sem isso, sitemap e Open Graph podem apontar para o placeholder `luminousbaby.pa
 
 ---
 
-## 7. Deploy manual (sem Git)
+## 7. Deploy manual (máquina local)
 
-Se ainda não usar Git no Cloudflare:
+Pré-requisito único: `npx wrangler login` e projeto Pages criado (`npx wrangler pages project create luminousbaby --production-branch master`).
+
+Defina `SITE_URL` no `.env` (copie de `.env.example`) e rode:
 
 ```bash
-npm run build
-npx wrangler pages deploy out --project-name=luminous-baby
+npm run deploy
 ```
 
-Requer [Wrangler](https://developers.cloudflare.com/workers/wrangler/) instalado e login (`npx wrangler login`).
+Publica em `https://luminousbaby.pages.dev`.
 
 ---
 
@@ -175,8 +230,8 @@ Ou, manualmente: `npm run build` + deploy da pasta `out/`.
 
 | Sintoma | Solução |
 |---------|---------|
-| Build passa, deploy falha com `opennextjs-cloudflare` / `pages-manifest.json` | Projeto configurado como **Worker/Next.js SSR**. Em **Settings → Build** mude preset para **None**, output para **`out`**, e **apague o Deploy command** (`npx wrangler deploy`). Retry deployment. |
-| `wrangler deploy` roda após o build | Remova o **Deploy command** — Pages publica a pasta `out/` automaticamente; não precisa de Wrangler no deploy Git. |
+| URL é `*.workers.dev` em vez de `luminousbaby.pages.dev` | Projeto criado como **Worker**. Crie um projeto **Pages** chamado `luminousbaby` (seção 4) e desconecte/delete o Worker. |
+| Build passa, deploy falha com `opennextjs-cloudflare` | Worker com deploy errado. Use Pages, ou `--assets ./out` / `wrangler.jsonc`. |
 | Build falha no CF | Verifique Node 20+, logs; teste `npm run build` local |
 | 404 em rotas do blog | Confirme **Build output directory** = `out` (não `.next`) |
 | Sitemap com URL errada | Corrija `SITE_URL` e refaça o deploy |
@@ -215,7 +270,8 @@ Não é necessário instalar `@opennextjs/cloudflare`, `wrangler.jsonc` nem muda
 ## Checklist antes de ir ao ar
 
 - [ ] `npm run build` passa localmente
-- [ ] `SITE_URL` configurada no Cloudflare
+- [ ] Site em `https://luminousbaby.pages.dev` (Pages, não Worker)
+- [ ] `SITE_URL=https://luminousbaby.pages.dev` no Cloudflare
 - [ ] `/sitemap.xml` e `/robots.txt` acessíveis na URL publicada
 - [ ] Links de afiliado e posts principais testados no mobile
 - [ ] Domínio customizado (se aplicável) com HTTPS ativo

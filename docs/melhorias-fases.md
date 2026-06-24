@@ -26,7 +26,7 @@
 
 ### Entregas
 
-- [x] **Deploy estático** — Cloudflare Pages configurado; `output: export` habilitado *(deploy no painel pendente)*
+- [x] **Deploy estático** — Cloudflare Pages (`luminousbaby.pages.dev`); `npm run deploy`
 - [x] **`sitemap.xml`** — todas as rotas (`/`, `/blog/[slug]`, `/afiliados`)
 - [x] **`robots.txt`** — permitir crawl; apontar para o sitemap
 - [x] **URL canônica** por post (`metadata.alternates.canonical`)
@@ -51,17 +51,17 @@ Site acessível em domínio real, indexável pelo Google, com disclosure de afil
 
 ### Entregas
 
-- [ ] **Script `npm run validate:posts`** — validar:
+- [x] **Script `npm run validate:posts`** — validar:
   - `slug` único e formato correto
   - `description` entre 140–155 caracteres
   - `type` coerente com campos (`affiliate`, `affiliateLink`, `repurpose`)
   - slugs em `<ProductCard>` existem
   - reviews/comparativos têm `<AffiliateButton>` e `affiliateLink`
   - pilares têm `affiliate: false`
-- [ ] **CI ou hook pré-build** — `validate:posts` antes de `next build`
-- [ ] **Contrato documentado com post generator** — output em `resources/posts/`, prompts em `resources/prompts/`
-- [ ] **`PostImage` em produção** — ocultar placeholder tracejado fora de `development` (ou flag `SHOW_IMAGE_PLACEHOLDERS`)
-- [ ] **Checklist de publicação** — 1 página em `docs/publicar-post.md` (validar → imagens → build → deploy)
+- [x] **Hook pré-build** — `prebuild` → `validate:posts` antes de `next build`
+- [x] **Contrato documentado com post generator** — `docs/contrato-post-generator.md`
+- [x] **`PostImage` em produção** — placeholder tracejado só em `development` (ou `SHOW_IMAGE_PLACEHOLDERS=true`)
+- [x] **Checklist de publicação** — `docs/publicar-post.md`
 
 ### Fora de escopo nesta fase
 
@@ -79,7 +79,7 @@ Novo post gerado externamente passa em `validate:posts` e no build sem edição 
 
 ### Entregas
 
-- [ ] **Rota `/blog`** — listagem com filtro por `type` e `category`
+- [x] **Rota `/blog`** — listagem com filtro por `type` e `category`
 - [ ] **Hub por categoria** — `/categoria/[slug]` (ex.: mobilidade-e-transporte)
 - [ ] **Hub por cluster** (opcional se cluster = categoria no início) — `/cluster/[slug]`
 - [ ] **Breadcrumbs** — `Início → Categoria → Post`

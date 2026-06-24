@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "validate:posts": "node scripts/validate-posts.mjs",
+    "prebuild": "npm run validate:posts",
     "build": "next build",
     "preview": "npx serve out",
+    "deploy": "npm run build && npx wrangler pages deploy out --project-name=luminousbaby --branch=master",
     "start": "next start",
     "lint": "next lint"
   },
