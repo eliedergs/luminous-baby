@@ -1,0 +1,73 @@
+import Image from "next/image";
+import Link from "next/link";
+import { getAllPosts } from "@/lib/mdx";
+
+export default function HomePage() {
+  const posts = getAllPosts();
+
+  return (
+    <div className="mx-auto max-w-3xl px-6 py-12">
+      <section className="text-center">
+        <Image
+          src="/logo.png"
+          alt="Luminous Baby — mãe segurando bebê"
+          width={200}
+          height={200}
+          className="mx-auto"
+          priority
+        />
+        <h1 className="mt-6 font-serif text-4xl md:text-5xl">
+          <span className="text-[var(--color-rose)]">Luminous</span>{" "}
+          <span className="text-[var(--color-sage)]">Baby</span>
+        </h1>
+        <p className="mx-auto mt-4 max-w-md text-[var(--color-taupe)]">
+          Carinho para bebê e maternidade — guias práticos, reviews honestos e
+          dicas para cada fase da jornada.
+        </p>
+      </section>
+
+      <section className="mt-16">
+        <h2 className="font-serif text-2xl text-[var(--color-ink)]">
+          Artigos recentes
+        </h2>
+
+        {posts.length === 0 ? (
+          <p className="mt-4 text-[var(--color-taupe)]">
+            Nenhum artigo publicado ainda. Adicione arquivos{" "}
+            <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-sm">
+              .mdx
+            </code>{" "}
+            em{" "}
+            <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-sm">
+              resources/posts/
+            </code>
+            .
+          </p>
+        ) : (
+          <ul className="mt-6 space-y-4">
+            {posts.map((post) => (
+              <li key={post.slug}>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="group block rounded-2xl border border-[var(--color-cream-dark)] bg-white p-5 transition hover:border-[var(--color-rose)]"
+                >
+                  <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-[var(--color-sage-deep)]">
+                    <span>{post.category}</span>
+                    <span aria-hidden>·</span>
+                    <span>{post.type}</span>
+                  </div>
+                  <h3 className="mt-2 font-serif text-xl text-[var(--color-ink)] group-hover:text-[var(--color-rose-deep)]">
+                    {post.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-[var(--color-taupe)]">
+                    {post.description}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
