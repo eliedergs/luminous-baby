@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PostListCard } from "@/components/PostListCard";
 import {
-  categoryToSlug,
   getTypeLabel,
   getUniqueCategories,
   getUniqueTypes,
@@ -56,20 +55,13 @@ function FilterChip({
 export function BlogIndex({ posts }: BlogIndexProps) {
   const searchParams = useSearchParams();
   const activeType = searchParams.get("type");
-  const activeCategory = searchParams.get("category");
 
   const types = getUniqueTypes(posts.map((p) => p.type));
   const categories = getUniqueCategories(posts.map((p) => p.category));
 
-  const filtered = posts.filter((post) => {
-    if (activeType && post.type !== activeType) {
-      return false;
-    }
-    if (activeCategory && categoryToSlug(post.category) !== activeCategory) {
-      return false;
-    }
-    return true;
-  });
+  const filtered = activeType
+    ? posts.filter((post) => post.type === activeType)
+    : posts;
 
   const baseParams = new URLSearchParams(searchParams.toString());
 
@@ -106,17 +98,13 @@ export function BlogIndex({ posts }: BlogIndexProps) {
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <FilterChip
-                href={filterLink(baseParams, "category", null)}
-                active={!activeCategory}
+                href={activeType ? `/blog?type=${activeType}` : "/blog"}
+                active={false}
               >
                 Todas
               </FilterChip>
               {categories.map(({ slug, name }) => (
-                <FilterChip
-                  key={slug}
-                  href={filterLink(baseParams, "category", slug)}
-                  active={activeCategory === slug}
-                >
+                <FilterChip key={slug} href={`/categoria/${slug}`} active={false}>
                   {name}
                 </FilterChip>
               ))}

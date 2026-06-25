@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getAllCategories } from "@/lib/categories";
 import { getAllPosts } from "@/lib/mdx";
 import { absoluteUrl } from "@/lib/site";
 
@@ -26,6 +27,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    {
+      url: absoluteUrl("/como-avaliamos"),
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    ...getAllCategories().map(({ slug }) => ({
+      url: absoluteUrl(`/categoria/${slug}`),
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    })),
     ...posts.map((post) => ({
       url: absoluteUrl(`/blog/${post.slug}`),
       lastModified: new Date(post.updatedAt),

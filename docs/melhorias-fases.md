@@ -80,13 +80,13 @@ Novo post gerado externamente passa em `validate:posts` e no build sem edição 
 ### Entregas
 
 - [x] **Rota `/blog`** — listagem com filtro por `type` e `category`
-- [ ] **Hub por categoria** — `/categoria/[slug]` (ex.: mobilidade-e-transporte)
-- [ ] **Hub por cluster** (opcional se cluster = categoria no início) — `/cluster/[slug]`
-- [ ] **Breadcrumbs** — `Início → Categoria → Post`
-- [ ] **Página “Como avaliamos”** — metodologia (INMETRO, critérios, atualização de preços)
-- [ ] **Bloco “Artigos relacionados”** automático — posts do mesmo `cluster`, excluindo o atual
-- [ ] **TOC (índice)** em pilares — H2 gerados a partir do MDX ou manual via componente
-- [ ] **Tempo de leitura** no header do post
+- [x] **Hub por categoria** — `/categoria/[slug]` (ex.: mobilidade-e-transporte)
+- [ ] **Hub por cluster** *(adiado — cluster = categoria nos posts atuais)* — `/cluster/[slug]`
+- [x] **Breadcrumbs** — `Início → Categoria → Post`
+- [x] **Página “Como avaliamos”** — metodologia honesta (fontes, critérios, limitações, preços)
+- [x] **Bloco “Artigos relacionados”** automático — posts do mesmo `cluster`, excluindo o atual
+- [x] **TOC (índice)** em pilares — H2 com âncoras automáticas
+- [x] **Tempo de leitura** no header do post
 
 ### Fora de escopo nesta fase
 

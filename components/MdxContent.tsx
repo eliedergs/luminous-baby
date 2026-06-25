@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import type { HeadingEntry } from "@/lib/headings";
+import { headingToSlug } from "@/lib/headings";
 import { AffiliateButton } from "./AffiliateButton";
 import { FAQ } from "./FAQ";
 import { PostImage } from "./PostImage";
@@ -41,9 +43,26 @@ function MdxLink({ href, children, ...props }: ComponentPropsWithoutRef<"a">) {
 type MdxContentProps = {
   source: string;
   slug: string;
+  headings?: HeadingEntry[];
 };
 
-function createMdxComponents(slug: string) {
+function flattenText(children: ReactNode): string {
+  if (typeof children === "string" || typeof children === "number") {
+    return String(children);
+  }
+  if (Array.isArray(children)) {
+    return children.map(flattenText).join("");
+  }
+  if (children && typeof children === "object" && "props" in children) {
+    const props = children.props as { children?: ReactNode };
+    return flattenText(props.children);
+  }
+  return "";
+}
+
+function createMdxComponents(slug: string, headings: HeadingEntry[] = []) {
+  let h2Index = 0;
+
   return {
     AffiliateButton,
     ProductCard,
@@ -55,6 +74,20 @@ function createMdxComponents(slug: string) {
     h1: ({ children }: { children?: ReactNode }) => (
       <span className="sr-only">{children}</span>
     ),
+    h2: ({ children }: { children?: ReactNode }) => {
+      const entry = headings[h2Index];
+      h2Index += 1;
+      const id = entry?.id ?? headingToSlug(flattenText(children));
+
+      return (
+        <h2
+          id={id}
+          className="mt-10 scroll-mt-24 font-serif text-2xl text-[var(--color-ink)]"
+        >
+          {children}
+        </h2>
+      );
+    },
     hr: () => (
       <hr className="my-8 border-0 border-t border-[var(--color-cream-dark)]" />
     ),
@@ -78,12 +111,12 @@ function createMdxComponents(slug: string) {
   };
 }
 
-export function MdxContent({ source, slug }: MdxContentProps) {
+export function MdxContent({ source, slug, headings }: MdxContentProps) {
   return (
-    <div className="prose prose-neutral max-w-none prose-headings:font-serif prose-headings:text-[var(--color-ink)] prose-p:text-[var(--color-taupe)] prose-strong:text-[var(--color-ink)] prose-h3:text-xl prose-h3:font-medium">
+    <div className="prose prose-neutral max-w-none prose-headings:font-serif prose-headings:text-[var(--color-ink)] prose-p:text-[var(--color-taupe)] prose-strong:text-[var(--color-ink)] prose-h3:text-xl prose-h3:font-medium prose-h2:mt-0">
       <MDXRemote
         source={source}
-        components={createMdxComponents(slug)}
+        components={createMdxComponents(slug, headings)}
         options={{
           mdxOptions: {
             remarkPlugins: [remarkGfm],

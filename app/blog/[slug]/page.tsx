@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogPostingSchema } from "@/components/BlogPostingSchema";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { MdxContent } from "@/components/MdxContent";
+import { RelatedPosts } from "@/components/RelatedPosts";
+import { PostToc } from "@/components/PostToc";
 import { resolvePostCover } from "@/lib/images";
+import { extractH2Headings } from "@/lib/headings";
 import { getAllSlugs, getPostBySlug } from "@/lib/mdx";
+import { getRelatedPosts } from "@/lib/related";
+import { formatReadingTime, getReadingTimeMinutes } from "@/lib/reading";
 import { absoluteUrl } from "@/lib/site";
+import { categoryToSlug } from "@/lib/taxonomy";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -62,11 +69,24 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   const cover = resolvePostCover(post.slug, post.cover);
+  const related = getRelatedPosts(post.slug, post.cluster);
+  const readingTime = getReadingTimeMinutes(post.content);
+  const headings = post.type === "pilar" ? extractH2Headings(post.content) : [];
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
       <BlogPostingSchema post={post} coverUrl={cover} />
-      <header>
+      <Breadcrumbs
+        items={[
+          { label: "Início", href: "/" },
+          {
+            label: post.category,
+            href: `/categoria/${categoryToSlug(post.category)}`,
+          },
+          { label: post.title },
+        ]}
+      />
+      <header className="mt-4">
         <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-[var(--color-sage-deep)]">
           <span>{post.category}</span>
           <span aria-hidden>·</span>
@@ -88,7 +108,11 @@ export default async function BlogPostPage({ params }: PageProps) {
           {post.updatedAt !== post.publishedAt && (
             <> · Atualizado em {formatDate(post.updatedAt)}</>
           )}
+          <span aria-hidden> · </span>
+          {formatReadingTime(readingTime)}
         </p>
+
+        {post.type === "pilar" && <PostToc headings={headings} />}
 
         {post.affiliate && (
           <p className="mt-4 rounded-xl bg-[var(--color-cream-dark)] px-4 py-3 text-xs text-[var(--color-taupe)]">
@@ -99,8 +123,14 @@ export default async function BlogPostPage({ params }: PageProps) {
       </header>
 
       <div className="mt-10">
-        <MdxContent source={post.content} slug={post.slug} />
+        <MdxContent
+          source={post.content}
+          slug={post.slug}
+          headings={headings}
+        />
       </div>
+
+      <RelatedPosts posts={related} cluster={post.cluster} />
     </article>
   );
 }

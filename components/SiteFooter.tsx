@@ -10,8 +10,14 @@ export function SiteFooter() {
         </p>
         <p className="mt-1">Carinho para bebê e maternidade</p>
         <p className="mt-4 text-xs leading-relaxed">
-          Alguns links neste site são de afiliados. Podemos receber comissão
-          sem custo extra para você.{" "}
+          <Link
+            href="/como-avaliamos"
+            className="text-[var(--color-sage-deep)] underline-offset-2 hover:underline"
+          >
+            Como avaliamos
+          </Link>
+          {" · "}
+          Alguns links são de afiliados.{" "}
           <Link
             href="/afiliados"
             className="text-[var(--color-sage-deep)] underline-offset-2 hover:underline"

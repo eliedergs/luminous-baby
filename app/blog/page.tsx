@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BlogIndex } from "@/components/BlogIndex";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { getAllPosts } from "@/lib/mdx";
 
 export const metadata: Metadata = {
@@ -14,7 +15,14 @@ export default function BlogPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="font-serif text-3xl text-[var(--color-ink)] md:text-4xl">
+      <Breadcrumbs
+        items={[
+          { label: "Início", href: "/" },
+          { label: "Blog" },
+        ]}
+      />
+
+      <h1 className="mt-4 font-serif text-3xl text-[var(--color-ink)] md:text-4xl">
         Blog
       </h1>
       <p className="mt-4 text-[var(--color-taupe)]">
